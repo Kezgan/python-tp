@@ -100,5 +100,3 @@ for i in range(cantidadHeladeras):
     heladeras.append(Heladera(i))
 
 Proveedores().start()
-
-#dsadsad
