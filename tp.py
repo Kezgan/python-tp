@@ -51,7 +51,7 @@ class Proveedores(threading.Thread):
         botellasSobrantes = botellasSobrantes + botellasAEntregar
 
         logging.info(f'Botellas stock = {botellasSobrantes}')
-        time.sleep(1)
+        time.sleep(2)
 
         while (botellasSobrantes > 0):
             if (heladera.hBotellas() < 10):
@@ -59,7 +59,9 @@ class Proveedores(threading.Thread):
                 botellasSobrantes = botellasSobrantes - 1
             else:
                 logging.info(f'En esta heladera hay {heladera.hBotellas()} botellas')
+                time.sleep(2)
                 logging.info(f'Sobraron {botellasSobrantes} botellas')
+                time.sleep(2)
                 break
 
     def entregarLatas(self, heladera):
@@ -68,7 +70,7 @@ class Proveedores(threading.Thread):
         latasSobrantes = latasAEntregar + latasSobrantes
 
         logging.info(f'Latas stock = {latasSobrantes}')
-        time.sleep(1)
+        time.sleep(2)
 
         while (latasSobrantes > 0):
             if (heladera.hLatas() < 15):
@@ -76,7 +78,9 @@ class Proveedores(threading.Thread):
                 latasSobrantes = latasSobrantes - 1
             else:
                 logging.info(f'En esta heladera hay {heladera.hLatas()} latas')
+                time.sleep(2)
                 logging.info(f'Sobraron {latasSobrantes} latas')
+                time.sleep(2)
                 break
 
     def run(self):
@@ -96,5 +100,3 @@ for i in range(cantidadHeladeras):
     heladeras.append(Heladera(i))
 
 Proveedores().start()
-
-#dsadsad
