@@ -9,7 +9,7 @@ heladeras = []
 botellasSobrantes = 0
 latasSobrantes = 0
 
-monitor = threading.Condition()
+semaforo = threading.Semaphore(1)
 
 cantidadHeladeras = 2
 cantidadProveedores = 1
@@ -24,17 +24,11 @@ class Heladera(threading.Thread):
         self.latas  = []
         self.id = id
 
-    def heladeraBotellas(self):
+    def hBotellas(self):
         return len(self.botellas)
 
-    def heladeraLatas(self):
+    def hLatas(self):
         return len(self.latas)
-
-    def espacioDisponible(self):
-        return 
-
-    # def run(self):
-        #self.llenarHeladera()
 
 #Mientras la cantidad a poner sea > a 0 que entre
 class Proveedores(threading.Thread):
@@ -47,37 +41,60 @@ class Proveedores(threading.Thread):
     def cantidadLatas(self):
         return random.randint(1, 10)
 
-    def generarCervezas(self, heladera):
-        botellasAEntregar = self.cantidadBotellas() + botellasSobrantes
-        latasAEntregar = self.cantidadLatas() + latasSobrantes
-        logging.info(f'Hay stock de {botellasAEntregar} botellas y {latasAEntregar} latas')
-        time.sleep(2)
-        self.entregarBotellas(heladera, botellasAEntregar)
-        self.entregarLatas(heladera, latasAEntregar)
+    def generarCervezas(self):
+        global botellasAEntregar, latasAEntregar
 
-    def entregarBotellas(self, heladera, botellasAEntregar):
-        while (botellasAEntregar > 0 & heladera.heladeraBotellas() < 10):
-            heladera.botellas.append(0)
-            logging.info(f'En esta heladera hay {len(heladera.botellas)} botellas')
-            botellasAEntregar -= botellasAEntregar
+        botellasAEntregar = self.cantidadBotellas()
+        latasAEntregar = self.cantidadLatas()
+        logging.info(f'Listo para entregar {botellasAEntregar} botellas y {latasAEntregar} latas')
+        time.sleep(1)
 
-            botellasSobrantes = botellasAEntregar
-            logging.info(f'Sobraron {botellasSobrantes} botellas')
-            time.sleep(2)
+    def entregarBotellas(self, heladera):
+        global botellasAEntregar, botellasSobrantes
 
-    def entregarLatas(self, heladera, latasAEntregar):
-        while (latasAEntregar > 0 & heladera.heladeraLatas() < 15):
-            heladera.latas.append(0)
-            logging.info(f'En esta heladera hay {len(heladera.latas)} latas')
-            latasAEntregar -= latasAEntregar
-            
-            latasSobrantes = latasAEntregar
-            logging.info(f'Sobraron {latasSobrantes} latas')
-            time.sleep(2)
+        botellasSobrantes = botellasSobrantes + botellasAEntregar
+
+        logging.info(f'Botellas stock = {botellasSobrantes}')
+        time.sleep(1)
+
+        while (botellasSobrantes > 0):
+            if (heladera.hBotellas() < 10):
+                heladera.botellas.append(0)
+                botellasSobrantes = botellasSobrantes - 1
+            else:
+                logging.info(f'En esta heladera hay {heladera.hBotellas()} botellas')
+                logging.info(f'Sobraron {botellasSobrantes} botellas')
+                break
+
+    def entregarLatas(self, heladera):
+        global latasAEntregar, latasSobrantes
+
+        latasSobrantes = latasAEntregar + latasSobrantes
+
+        logging.info(f'Latas stock = {latasSobrantes}')
+        time.sleep(1)
+
+        while (latasSobrantes > 0):
+            if (heladera.hLatas() < 15):
+                heladera.latas.append(0)
+                latasSobrantes = latasSobrantes - 1
+            else:
+                logging.info(f'En esta heladera hay {heladera.hLatas()} latas')
+                logging.info(f'Sobraron {latasSobrantes} latas')
+                break
 
     def run(self):
-        while(True):
-            self.generarCervezas(heladeras[0])
+        semaforo.acquire()
+        
+        for i in range(cantidadHeladeras):
+            while not (heladeras[i].hBotellas() == 10) & (heladeras[i].hLatas() == 15):
+                self.generarCervezas()
+                self.entregarBotellas(heladeras[i])
+                self.entregarLatas(heladeras[i])
+
+            logging.info(f'Esta heladera esta llena con {heladeras[i].hBotellas()} y {heladeras[i].hLatas()}')
+
+        semaforo.release()
 
 for i in range(cantidadHeladeras):
     heladeras.append(Heladera(i))
