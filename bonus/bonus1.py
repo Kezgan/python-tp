@@ -14,6 +14,9 @@ semaforo = threading.Semaphore(1)
 cantidadHeladeras = 2
 cantidadProveedores = 1
 
+# def verificarHeladera():
+
+#Preguntar a la heladera primero cuanto espacio tiene antes de meter las cervezas
 class Heladera(threading.Thread):
     def __init__(self, id):
         super().__init__()
@@ -27,6 +30,7 @@ class Heladera(threading.Thread):
     def hLatas(self):
         return len(self.latas)
 
+#Mientras la cantidad a poner sea > a 0 que entre
 class Proveedores(threading.Thread):
     def __init__(self):
         super().__init__()
@@ -81,7 +85,7 @@ class Proveedores(threading.Thread):
 
     def run(self):
         semaforo.acquire()
-
+        
         for i in range(cantidadHeladeras):
             while not (heladeras[i].hBotellas() == 10) & (heladeras[i].hLatas() == 15):
                 self.generarCervezas()
@@ -96,3 +100,5 @@ for i in range(cantidadHeladeras):
     heladeras.append(Heladera(i))
 
 Proveedores().start()
+
+#dsadsad
