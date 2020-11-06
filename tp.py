@@ -27,9 +27,6 @@ class Heladera(threading.Thread):
     def hLatas(self):
         return len(self.latas)
 
-#------------
-#Funciona pero con 1 solo proveedor y no se como hacer para que la variable "botellasSobrantes", donde tengo las cervezas generadas + las cervezas sobrantes, se guarde para que por ejemplo cuando venga el proveedor 2 acumule las nuevas ahi y no se pierdan, porque supongo que al crearse el proveedor2 es un objeto distinto y por lo tanto no tendria las botellasSobrantes del proveedor1...
-#------------
 
 class Proveedores(threading.Thread):
     def __init__(self):
