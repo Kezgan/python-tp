@@ -12,7 +12,7 @@ latasSobrantes = 0
 semaforo = threading.Semaphore(1)
 
 cantidadHeladeras = 3
-cantidadProveedores = 2
+cantidadProveedores = 1
 
 class Heladera(threading.Thread):
     def __init__(self, id):
@@ -21,16 +21,22 @@ class Heladera(threading.Thread):
         self.latas  = []
         self.id = id
 
+    def id(self):
+        return self.id
+
     def hBotellas(self):
         return len(self.botellas)
 
     def hLatas(self):
         return len(self.latas)
 
+    def hayEspacio(self):
+        return (self.hBotellas() < 10) | (self.hLatas() < 15)        
 
 class Proveedores(threading.Thread):
-    def __init__(self):
+    def __init__(self, monitorProveedor):
         super().__init__()
+        self.monitorProveedor = monitorProveedor
 
     def cantidadBotellas(self):
         return random.randint(1, 10)
@@ -44,7 +50,7 @@ class Proveedores(threading.Thread):
         botellasAEntregar = self.cantidadBotellas()
         latasAEntregar = self.cantidadLatas()
         logging.info(f'Listo para entregar {botellasAEntregar} botellas y {latasAEntregar} latas')
-        time.sleep(1)
+        time.sleep(2)
 
     def entregarBotellas(self, heladera):
         global botellasAEntregar, botellasSobrantes
@@ -54,16 +60,9 @@ class Proveedores(threading.Thread):
         logging.info(f'Botellas stock = {botellasSobrantes}')
         time.sleep(2)
 
-        while (botellasSobrantes > 0):
-            if (heladera.hBotellas() < 10):
-                heladera.botellas.append(0)
-                botellasSobrantes = botellasSobrantes - 1
-            else:
-                logging.info(f'En esta heladera hay {heladera.hBotellas()} botellas')
-                time.sleep(2)
-                logging.info(f'Sobraron {botellasSobrantes} botellas')
-                time.sleep(2)
-                break
+        while (botellasSobrantes > 0) & (heladera.hBotellas() < 10):
+            heladera.botellas.append(0)
+            botellasSobrantes = botellasSobrantes - 1
 
     def entregarLatas(self, heladera):
         global latasAEntregar, latasSobrantes
@@ -73,31 +72,32 @@ class Proveedores(threading.Thread):
         logging.info(f'Latas stock = {latasSobrantes}')
         time.sleep(2)
 
-        while (latasSobrantes > 0):
-            if (heladera.hLatas() < 15):
-                heladera.latas.append(0)
-                latasSobrantes = latasSobrantes - 1
-            else:
-                logging.info(f'En esta heladera hay {heladera.hLatas()} latas')
-                time.sleep(2)
-                logging.info(f'Sobraron {latasSobrantes} latas')
-                time.sleep(2)
-                break
+        while (latasSobrantes > 0) & (heladera.hLatas() < 15):
+            heladera.latas.append(0)
+            latasSobrantes = latasSobrantes - 1
 
     def run(self):
-        semaforo.acquire()
+        
+            with self.monitorProveedor:
+                for i in range(cantidadHeladeras):
+                    
+                    while (heladeras[i].hayEspacio()):
+                        self.generarCervezas()
+                        self.entregarBotellas(heladeras[i])
+                        self.entregarLatas(heladeras[i])
 
-        for i in range(cantidadHeladeras):
-            while not (heladeras[i].hBotellas() == 10) & (heladeras[i].hLatas() == 15):
-                self.generarCervezas()
-                self.entregarBotellas(heladeras[i])
-                self.entregarLatas(heladeras[i])
+                        logging.info(f'En la heladera {heladeras[i].id} hay {heladeras[i].hBotellas()} botellas y {heladeras[i].hLatas()} latas')
+                        time.sleep(2)
+                        logging.info(f'Sobraron {botellasSobrantes} botellas y {latasSobrantes} latas')
+                        time.sleep(2)
+                    logging.info(f'La heladera {heladeras[i].id} esta llena con {heladeras[i].hBotellas()} botellas y {heladeras[i].hLatas()} latas')
+                    time.sleep(2)
+        
 
-            logging.info(f'Esta heladera esta llena con {heladeras[i].hBotellas()} y {heladeras[i].hLatas()}')
-
-        semaforo.release()
+monitorProveedor = threading.Condition()
 
 for i in range(cantidadHeladeras):
     heladeras.append(Heladera(i))
 
-Proveedores().start()
+for i in range(cantidadProveedores):
+    Proveedores(monitorProveedor).start()
