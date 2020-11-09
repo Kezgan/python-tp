@@ -97,7 +97,8 @@ class Proveedores(threading.Thread):
 
 # Intenté varias formas pero no me termina de funcionar con varios proveedores porque lo que pasa
 # es que entra el primer proveedor y hasta que no se llenan todas las heladeras no viene el siguiente.
-# Probé metiendo algun monitor/semaforo en el run de proveedores pero no hay caso.        
+# Probé metiendo algun monitor/semaforo en el run de proveedores pero no hay caso.
+# Perdi bastante tiempo con esto porque encima queria manejar todo desde proveedor, pero bueno ¯\_(ツ)_/¯
 
 monitorProveedor = threading.Condition()
 
