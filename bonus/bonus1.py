@@ -80,9 +80,8 @@ class Proveedores(threading.Thread):
     def run(self):
         while(True):
             with self.monitorProveedor:
-                with monitorBeode:
-                    for i in range(cantidadHeladeras):
-                        
+                for i in range(cantidadHeladeras):
+                    with monitorBeode:
                         while (heladeras[i].hayEspacio()):
                             self.generarCervezas()
                             self.entregarBotellas(heladeras[i])
