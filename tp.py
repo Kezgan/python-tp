@@ -14,6 +14,8 @@ semaforo = threading.Semaphore(1)
 cantidadHeladeras = 3
 cantidadProveedores = 1
 
+
+
 class Heladera(threading.Thread):
     def __init__(self, id):
         super().__init__()
@@ -78,21 +80,24 @@ class Proveedores(threading.Thread):
 
     def run(self):
         
-            with self.monitorProveedor:
-                for i in range(cantidadHeladeras):
-                    
-                    while (heladeras[i].hayEspacio()):
-                        self.generarCervezas()
-                        self.entregarBotellas(heladeras[i])
-                        self.entregarLatas(heladeras[i])
+        with self.monitorProveedor:
+            for i in range(cantidadHeladeras):
+                
+                while (heladeras[i].hayEspacio()):
+                    self.generarCervezas()
+                    self.entregarBotellas(heladeras[i])
+                    self.entregarLatas(heladeras[i])
 
-                        logging.info(f'En la heladera {heladeras[i].id} hay {heladeras[i].hBotellas()} botellas y {heladeras[i].hLatas()} latas')
-                        time.sleep(2)
-                        logging.info(f'Sobraron {botellasSobrantes} botellas y {latasSobrantes} latas')
-                        time.sleep(2)
-                    logging.info(f'La heladera {heladeras[i].id} esta llena con {heladeras[i].hBotellas()} botellas y {heladeras[i].hLatas()} latas')
+                    logging.info(f'En la heladera {heladeras[i].id} hay {heladeras[i].hBotellas()} botellas y {heladeras[i].hLatas()} latas')
                     time.sleep(2)
-        
+                    logging.info(f'Sobraron {botellasSobrantes} botellas y {latasSobrantes} latas')
+                    time.sleep(2)
+                logging.info(f'La heladera {heladeras[i].id} esta llena con {heladeras[i].hBotellas()} botellas y {heladeras[i].hLatas()} latas')
+                time.sleep(2)
+
+# Intenté varias formas pero no me termina de funcionar con varios proveedores porque lo que pasa
+# es que entra el primer proveedor y hasta que no se llenan todas las heladeras no viene el siguiente.
+# Probé metiendo algun monitor/semaforo en el run de proveedores pero no hay caso.        
 
 monitorProveedor = threading.Condition()
 
@@ -101,3 +106,4 @@ for i in range(cantidadHeladeras):
 
 for i in range(cantidadProveedores):
     Proveedores(monitorProveedor).start()
+
