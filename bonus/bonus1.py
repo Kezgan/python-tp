@@ -80,19 +80,21 @@ class Proveedores(threading.Thread):
     def run(self):
         while(True):
             with self.monitorProveedor:
-                for i in range(cantidadHeladeras):
-                    
-                    while (heladeras[i].hayEspacio()):
-                        self.generarCervezas()
-                        self.entregarBotellas(heladeras[i])
-                        self.entregarLatas(heladeras[i])
+                with monitorBeode:
+                    for i in range(cantidadHeladeras):
+                        
+                        while (heladeras[i].hayEspacio()):
+                            self.generarCervezas()
+                            self.entregarBotellas(heladeras[i])
+                            self.entregarLatas(heladeras[i])
 
-                        logging.info(f'En la heladera {heladeras[i].id} hay {heladeras[i].hBotellas()} botellas y {heladeras[i].hLatas()} latas')
+                            logging.info(f'En la heladera {heladeras[i].id} hay {heladeras[i].hBotellas()} botellas y {heladeras[i].hLatas()} latas')
+                            time.sleep(2)
+                            logging.info(f'Sobraron {botellasSobrantes} botellas y {latasSobrantes} latas')
+                            time.sleep(2)
+                            monitorBeode.notify()
+                        logging.info(f'La heladera {heladeras[i].id} esta llena con {heladeras[i].hBotellas()} botellas y {heladeras[i].hLatas()} latas')
                         time.sleep(2)
-                        logging.info(f'Sobraron {botellasSobrantes} botellas y {latasSobrantes} latas')
-                        time.sleep(2)
-                    logging.info(f'La heladera {heladeras[i].id} esta llena con {heladeras[i].hBotellas()} botellas y {heladeras[i].hLatas()} latas')
-                    time.sleep(2)
         
 class Beodes(threading.Thread):
     def __init__(self, id, consumirBotellas, consumirLatas):
@@ -120,11 +122,16 @@ class Beodes(threading.Thread):
         logging.info(f'Ya bebí, ahora en la heladera {heladeras[self.elegirHeladera]} quedan {heladeras[self.elegirHeladera].hLatas()} latas')
 
     def run(self):
-        while (self.consumirBotellas > 0) | (self.consumirLatas > 0):
-            with monitorBeode:
-                if (heladeras[self.elegirHeladera].hBotellas() > 0) & (self.consumirBotellas > 0):
+        while(True):
+            while (self.consumirBotellas > 0) | (self.consumirLatas > 0):
+                with monitorBeode:
+                    if (heladeras[self.elegirHeladera].hBotellas() == 0):
+                        monitorBeode.wait()
                     self.beberBotella()
-                if (heladeras[self.elegirHeladera].hLatas() > 0) & (self.consumirLatas > 0):
+                    time.sleep(5)
+
+                    if (heladeras[self.elegirHeladera].hLatas() == 0):
+                        monitorBeode.wait()
                     self.beberLata()
 
 monitorProveedor = threading.Condition()
