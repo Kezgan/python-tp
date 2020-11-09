@@ -19,6 +19,8 @@ semaforoHeladera = threading.Semaphore(1)
 cantidadHeladeras = 3
 cantidadProveedores = 2
 
+# No dar importancia a este archivo, esta de ejemplo para mi nada mas
+
 class Heladera(threading.Thread):
     def __init__(self, id):
         super().__init__()
