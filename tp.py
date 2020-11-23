@@ -106,7 +106,9 @@ class Proveedores(threading.Thread):
 #----------------------------------------------------------
 
 # Actualización:
-# Ahora agregando semaforo en el run "funciona", el tema es que si el proveedor 1 llenó la heladera 0, al pasar al proveedor 2 este se queda con la heladera 0 de antes, entonces vuelve a verificar si está llena y vuelve a tirar el mensaje de que se llenó la healdera 0. Recién cuando se vuelve al proveedor 1 pasa a la siguiente heladera. No pude arreglar esto.
+# Ahora agregando semaforo en el run "funciona", el tema es que si el proveedor 1 llenó la heladera 0,
+# al pasar al proveedor 2 este se queda con la heladera 0 de antes, entonces vuelve a verificar si está llena y vuelve a tirar el mensaje de que se llenó la healdera 0.
+# Recién cuando se vuelve al proveedor 1 pasa a la siguiente heladera. No pude arreglar esto.
 
 #listaProveedores = []
 
